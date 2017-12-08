@@ -61,7 +61,42 @@ public class Player {
 		this.numWins += 1;
 	}
 	
-	//TODO: add method to move x number of spaces
-	//TODO: add methods that check if the player is currently on a square with chute/ladder/etc.
-	//TODO: add method to check if on winning square
+	/**
+	 * Move the player by a specified number of spaces.
+	 * 
+	 * Also makes player fall down chute or climb ladder if it lands on
+	 * one of those squares.
+	 * 
+	 * @param number the number of spaces to move
+	 * @param board the board to move on
+	 * @return true if the move was successful (i.e. didn't place player out of bounds), false otherwise
+	 */
+	public boolean makeMove(int number, Gameboard board) {
+		Square nextSquare = board.getSquareOffset(this.currentSquare, number);
+		if (nextSquare == null) {
+			return false;
+		}
+		this.currentSquare = nextSquare;
+		return true;
+	}
+	
+	/**
+	 * Check if the player is on a square with a chute or a ladder.
+	 * If they are, the method has the player climb the ladder or fall down chute.
+	 * 
+	 * @return true if a ladder or chute is encountered, false otherwise
+	 */
+	public boolean checkChuteLadder() {
+		if (this.getCurrentSquare().getChute() != null) {
+			System.out.println("Uh oh! You landed on a chute :(");
+			this.getCurrentSquare().getChute().fall(this);
+			return true;
+		}
+		if (this.getCurrentSquare().getLadder() != null) {
+			System.out.println("You landed on a ladder");
+			this.getCurrentSquare().getLadder().climb(this);
+			return true;
+		}
+		return false;
+	}
 }

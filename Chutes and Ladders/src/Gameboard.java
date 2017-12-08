@@ -7,11 +7,7 @@ public class Gameboard {
 	 */
 	private Square[] board;
 	
-	/**
-	 * True if board is created, false otherwise.
-	 */
-	private boolean boardCreated;
-	
+
 	/**
 	 * Constant of 100 for the board's size.
 	 */
@@ -19,12 +15,11 @@ public class Gameboard {
 	
 	/**
 	 * The constructor for the game board.
-	 * Creates a game board with 100  (standard game size) empty 
-	 * square object references.
+	 * Creates a game board with 100 (standard game size) squares.
 	 */
 	public Gameboard() {
 		this.board = new Square[100];
-		this.boardCreated = false;
+		this.fillBoard();
 	}
 	
 	/**
@@ -58,20 +53,41 @@ public class Gameboard {
 		new Chute(this.getSquareAt(92), this.getSquareAt(72));
 		new Chute(this.getSquareAt(94), this.getSquareAt(74));
 		new Chute(this.getSquareAt(97), this.getSquareAt(77));
-		
-		this.boardCreated = true;
 	}
 	
 	/**
 	 * Gets the square object at a given index in the board.
 	 * 
 	 * @param index the index of the square object to get
-	 * @return the square object at the index
+	 * @return the square object at the index, null if index out of bounds
 	 */
 	private Square getSquareAt(int index) {
+		if (index >= this.board.length || index < 0) {
+			return null;
+		}
 		return this.board[index];
 	}
+
 	
-	//TODO: add method to check if there is a player on the winning square.
-	//TODO: add method to check if board is created (getter method)
+	/**
+	 * Get a square with a given offset amount from specified square.
+	 * 
+	 * <p>To be used to move players by a certain amount
+	 * 
+	 * <p>If the specified square is null (i.e. off the board before the first turn)
+	 * this method will offset from the first square on the board
+	 * 
+	 * @param square the square from which the offset will be based
+	 * @param offset the amount of squares to move by
+	 * @return another square after offset is applied, null if off the board after offset
+	 */
+	public Square getSquareOffset(Square square, int offset) {
+		// If the square is null (i.e. before first turn), we move a certain number of squares from the beginning
+		if (square == null) {
+			return this.getSquareAt(offset - 1);
+		}
+		int currentIndex = square.getNumber() - 1;
+		int nextIndex = currentIndex + offset;
+		return this.getSquareAt(nextIndex); // Returns null if the index is out of bounds
+	}
 }
