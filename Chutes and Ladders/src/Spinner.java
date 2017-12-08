@@ -28,6 +28,6 @@ public class Spinner {
 	 * @return a random number between 0 and specified MAX_VALUE
 	 */
 	public int spin() {
-		return generator.nextInt(MAX_VALUE + 1); // bound is exclusive
+		return generator.nextInt(MAX_VALUE) + 1; // bound is exclusive
 	}
 }
