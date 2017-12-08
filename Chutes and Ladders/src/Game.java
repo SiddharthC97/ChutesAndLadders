@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 /**
  * Class to run the game of Chutes and Ladders.
@@ -106,6 +107,15 @@ public class Game {
 		this.currentPlayer = this.getPlayerAt(currentPlayerIndex);
 	}
 	
+	private int getIndexOfCurrentPlayer() {
+		for (int playerNum = 0; playerNum < players.length; playerNum++) {
+			if (players[playerNum].equals(this.currentPlayer)) {
+				return playerNum;
+			}
+		}
+		return -1;
+	}
+	
 	/**
 	 * Prompts user for names of players and adds them to the array.
 	 */
@@ -133,14 +143,42 @@ public class Game {
 	}
 	
 	public Player determineFirstPlayer() {
-		int[] values = new int[this.players.length];
+		ArrayList<Player> playersRemaining = new ArrayList<Player>(4);
+		ArrayList<Player> maxScorePlayers = new ArrayList<Player>(4);
+		Player winner;
+		int maxValue = 0;
+		// Initialize the playersRemaining list with all the players
 		for (int playerNum = 0; playerNum < this.players.length; playerNum++) {
-			Player player = this.getPlayerAt(playerNum);
-			int spinValue = this.spinner.spin();
-			values[playerNum] = spinValue;
-			System.out.println(player.getName() + " spun a " + spinValue);
+			playersRemaining.add(this.players[playerNum]);
 		}
-		return null;
+		while (playersRemaining.size() > 1) {
+			// Spin each player
+			for (int playerNum = 0; playerNum < playersRemaining.size(); playerNum++) {
+				Player player = playersRemaining.get(playerNum);
+				int spinValue = this.spinner.spin();
+				System.out.println(player.getName() + " spun a " + spinValue);
+				if (spinValue == maxValue) {
+					maxScorePlayers.add(player);
+				}
+				if (spinValue > maxValue) {
+					maxValue = spinValue;
+					maxScorePlayers.clear();
+					maxScorePlayers.add(player);
+				}
+			}
+			// Copy maxScorePlayers to playersRemaining
+			playersRemaining.clear();
+			for (int playerNum = 0; playerNum < maxScorePlayers.size(); playerNum++) {
+				playersRemaining.add(maxScorePlayers.get(playerNum));
+			}
+			maxScorePlayers.clear();
+			maxValue = 0;
+			if (playersRemaining.size() > 1) {
+				System.out.println("There was a tie. Players who tied spin again.");
+			}
+		}
+		winner = playersRemaining.get(0);
+		return winner;
 	}
 
 	
@@ -204,10 +242,6 @@ public class Game {
 		}
 	}
 	
-	//TODO: write a method for taking a standard turn of the player
-
-	//TODO: write methods for interacting with the user and running the entire game, including the main method
-	
 	public static void main(final String[] unused) {
 		boolean continuePlaying = true;
 		Game game = null;
@@ -222,7 +256,9 @@ public class Game {
 			System.out.println("\nLet's start!\n");
 			System.out.println("All players are off the board to start.");
 			System.out.println("The first player will be determined by the highest number on the spinner.\n");
-			game.setCurrentPlayer(0); // TODO: CHANGE THIS TO DETERMINEFIRSTPLAYER
+			Player firstPlayer = game.determineFirstPlayer();
+			game.currentPlayer = firstPlayer;
+			game.currentPlayerIndex = game.getIndexOfCurrentPlayer();
 			System.out.println(game.getCurrentPlayer().getName() + " goes first... \n" + SEPARATOR);
 			
 			while (true) {
