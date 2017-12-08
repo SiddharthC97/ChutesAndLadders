@@ -72,6 +72,11 @@ public class Game {
 	}
 
 
+	/**
+	 * Set a player at a certain index in the players array
+	 * @param player the player to set
+	 * @param index index in the array where the player will be placed
+	 */
 	public void setPlayerAt(Player player, int index) {
 		this.players[index] = player;
 	}
@@ -101,6 +106,9 @@ public class Game {
 		this.currentPlayer = this.getPlayerAt(currentPlayerIndex);
 	}
 	
+	/**
+	 * Prompts user for names of players and adds them to the array.
+	 */
 	public void addPlayers() {
 		for (int playerNum = 0; playerNum < this.players.length; playerNum++) {
 			// Ask for name
@@ -157,8 +165,16 @@ public class Game {
 		return numPlayers;
 	}
 	
+	/**
+	 * Begin the game of Chutes and Ladders.
+	 * 
+	 * <p>Gives a welcome message and get user input on how many players there are. 
+	 * Then it creates an object with that number of players.
+	 * 
+	 * @return a new Game object with the number of players the user specifies.
+	 */
 	public static Game beginGame() {
-		// Give a welcome message and get user input on how many players there are
+		// 
 		System.out.println("CHUTES AND LADDERS \nBy Bradley Fishman and Siddharth Chadha \n" + SEPARATOR);
 		int numPlayers = askNumPlayers();
 		System.out.println(SEPARATOR);
@@ -174,6 +190,20 @@ public class Game {
 		return new Game(numPlayers);
 	}
 	
+	public void nextPlayer() {
+		if(this.currentPlayerIndex == this.players.length - 1) {
+			this.setCurrentPlayer(0);
+		} else {
+			this.setCurrentPlayer(++this.currentPlayerIndex);
+		}
+	}
+	
+	public void resetPlayers() {
+		for(Player player : this.players) {
+			player.setCurrentSquare(null);
+		}
+	}
+	
 	//TODO: write a method for taking a standard turn of the player
 
 	//TODO: write methods for interacting with the user and running the entire game, including the main method
@@ -181,21 +211,80 @@ public class Game {
 	public static void main(final String[] unused) {
 		boolean continuePlaying = true;
 		Game game = null;
+		Player currentPlayer;
+		
+		// Initialize the game
+		game = beginGame();
+		game.addPlayers();
+		
 		while (continuePlaying) {
-			// Initialize the game
-			game = beginGame();
-			game.addPlayers();
-			
 			// Let's begin
 			System.out.println("\nLet's start!\n");
 			System.out.println("All players are off the board to start.");
 			System.out.println("The first player will be determined by the highest number on the spinner.\n");
-			game.determineFirstPlayer();
+			game.setCurrentPlayer(0); // TODO: CHANGE THIS TO DETERMINEFIRSTPLAYER
+			System.out.println(game.getCurrentPlayer().getName() + " goes first... \n" + SEPARATOR);
 			
-			System.out.println(game.getPlayerAt(0).getName());
+			while (true) {
+				currentPlayer = game.getCurrentPlayer();
+				System.out.println("It is " + currentPlayer.getName() + "\'s turn.");
+				System.out.println("Press enter to spin...");
+				scanner.nextLine();
+				int spinNumber = game.spinner.spin();
+				System.out.println("You spun a " + spinNumber);
+				Square oldSquare = currentPlayer.getCurrentSquare();
+				int oldSquareNum = 0;
+				if (oldSquare != null) {
+					oldSquareNum = oldSquare.getNumber();
+				}
+				if(!currentPlayer.makeMove(spinNumber, game.board)) {
+					System.out.println("You can't make that move, wait until your next turn.");
+					System.out.println(SEPARATOR);
+					game.nextPlayer();
+					continue;
+				}
+				int newSquareNum = currentPlayer.getCurrentSquare().getNumber();
+				System.out.println("You moved from square " + oldSquareNum + " to " + newSquareNum);
+				oldSquareNum = newSquareNum;
+				if(currentPlayer.checkChuteLadder()) {
+					newSquareNum = currentPlayer.getCurrentSquare().getNumber();
+					System.out.println("You moved from square " + oldSquareNum + " to " + newSquareNum);
+				}
+				
+				if(game.isWinner(currentPlayer)) {
+					break;
+				}
+				System.out.println(SEPARATOR);
+				game.nextPlayer();
+			}
+			System.out.println(currentPlayer.getName() + " won!");
+			currentPlayer.incrementWins();
+			System.out.println(SEPARATOR);
+			for (int playerNum = 0; playerNum < game.players.length; playerNum++) {
+				Player player = game.getPlayerAt(playerNum);
+				System.out.println(player.getName() + ": " + player.getNumWins() + " wins");
+			}
+			System.out.println(SEPARATOR);
+			
+			// Prompt for play again
+			System.out.println("Play again?");
+			int playAgainResponse = 0;
+			while(playAgainResponse < 1 || playAgainResponse > 2) {
+				try {
+					System.out.println("Type the corresponding number to respond...");
+					System.out.println("Yes: 1 \nNo: 2");
+					playAgainResponse = scanner.nextInt();
+				} catch (Exception e) {
+					scanner.nextLine();
+					continue;
+				}
+			}
+			scanner.nextLine();
+			game.resetPlayers();
+			if (playAgainResponse == 2) {
+				continuePlaying = false;
+			}
 		}
-		
-		// Just being used for some testing for now to make sure classes are behaving properly
-		System.out.println(game.board.getSquareOffset(null, game.spinner.spin()).getNumber());
+		System.out.println("Thanks for playing!");
 	}
 }

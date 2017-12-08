@@ -77,21 +77,26 @@ public class Player {
 			return false;
 		}
 		this.currentSquare = nextSquare;
-		this.checkChuteLadder();
 		return true;
 	}
 	
 	/**
 	 * Check if the player is on a square with a chute or a ladder.
 	 * If they are, the method has the player climb the ladder or fall down chute.
+	 * 
+	 * @return true if a ladder or chute is encountered, false otherwise
 	 */
-	public void checkChuteLadder() {
+	public boolean checkChuteLadder() {
 		if (this.getCurrentSquare().getChute() != null) {
+			System.out.println("Uh oh! You landed on a chute :(");
 			this.getCurrentSquare().getChute().fall(this);
-			return;
+			return true;
 		}
 		if (this.getCurrentSquare().getLadder() != null) {
+			System.out.println("You landed on a ladder");
 			this.getCurrentSquare().getLadder().climb(this);
+			return true;
 		}
+		return false;
 	}
 }
